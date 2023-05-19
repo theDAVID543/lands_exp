@@ -1,0 +1,6 @@
+name: lands_exp
+version: '${project.version}'
+main: group.david.the.requirement
+api-version: 1.19
+depend:
+  - Lands
