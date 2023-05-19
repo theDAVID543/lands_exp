@@ -104,25 +104,28 @@ public class requirement extends JavaPlugin {
 			@Nullable Map<Level, ConfigurationSection> nationLevels = landsAPI.getLevelsHandler().getNationSection();
 			if (nationLevels != null) {
 				for (Map.Entry<Level, ConfigurationSection> entry : nationLevels.entrySet()) {
-					ConfigurationSection requirement = entry.getValue().getConfigurationSection("requirements.upgradeablehoppers.hoppers");
+					ConfigurationSection requirement = entry.getValue().getConfigurationSection("requirements.expsPlayerGot.exps");
 					if (requirement != null) {
 						int value = Math.max(requirement.getInt("required", 0), 0);
-
-						String reqName = requirement.getString("title", "Requirement Name");
-						List<String> description = requirement.getStringList("description");
+						String reqName = Objects.requireNonNull(requirement.getString("title", "Requirement Name"));
+						List<String> description = Objects.requireNonNull(requirement.getStringList("description"));
 						for (int i = 0; i < description.size(); i++) {
 							description.set(i, description.get(i));
 						}
-						entry.getKey().addRequirement(new Requirement(myPlugin, "expsPlayerGot", reqName, description, value, String.valueOf(value)) {
+						entry.getKey().addRequirement(new CachedRequirement(myPlugin, "expsplayergot", reqName, description, value, String.valueOf(value)) {
 							@Override
 							public @NotNull String getProgressDisplay(@NotNull MemberHolder memberHolder) {
 								return (int) getValue(memberHolder) + "/" + value;
 							}
 
 							@Override
-							public float getValue(@NotNull MemberHolder memberHolder) {
-								return 0;
-								// return getHoppers((Nation) memberHolder);
+							public float retrieveValue(@NotNull MemberHolder memberHolder) {
+								final Land land = (Land) memberHolder;
+								if(modified.get(land)!=null){
+									return ConfigReader.getLandExp(land) - modified.get(land);
+								}else{
+									return ConfigReader.getLandExp(land);
+								}
 							}
 						});
 					}
